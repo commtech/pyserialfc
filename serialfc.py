@@ -45,6 +45,10 @@ IOCTL_FASTCOM_GET_FRAME_LENGTH = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x817, METHOD_BU
 
 IOCTL_FASTCOM_GET_CARD_TYPE = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x818, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
+IOCTL_FASTCOM_ENABLE_9BIT = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x819, METHOD_BUFFERED, FILE_ANY_ACCESS)
+IOCTL_FASTCOM_DISABLE_9BIT = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81A, METHOD_BUFFERED, FILE_ANY_ACCESS)
+IOCTL_FASTCOM_GET_9BIT = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81B, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
 
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
 
@@ -211,6 +215,26 @@ class Port(serial.Serial):
         return value[0]
 
     frame_length = property(fset=_set_frame_length, fget=_get_frame_length)
+
+    def _set_9bit(self, status):
+        """Sets the value of the 9-bit setting."""
+        if status:
+            win32file.DeviceIoControl(self.hComPort, IOCTL_FASTCOM_ENABLE_9BIT, None, 0, None)
+        else:
+            win32file.DeviceIoControl(self.hComPort, IOCTL_FASTCOM_DISABLE_9BIT, None, 0, None)
+
+    def _get_9bit(self):
+        """Gets the value of the 9-bit setting."""
+        buf_size = struct.calcsize("?")
+        buf = win32file.DeviceIoControl(self.hComPort, IOCTL_FASTCOM_GET_9BIT, None, buf_size, None)
+        value = struct.unpack("?", buf)
+
+        if (value[0]):
+            return True
+        else:
+            return False
+
+    nine_bit = property(fset=_set_9bit, fget=_get_9bit)
 
     def _get_card_type(self):
         buf_size = struct.calcsize("I")
