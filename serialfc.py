@@ -219,6 +219,9 @@ class Port(serial.Serial):
                 else:
                     raise
 
+    def _ioctl_set_unsigned_integer(self, ioctl_name, value):
+        self._ioctl_set_integer(ioctl_name, value, 'I')
+
     def _ioctl_get_integer(self, ioctl_name, fmt='i'):
         if os.name == 'nt':
             buf_size = struct.calcsize(fmt)
@@ -243,7 +246,7 @@ class Port(serial.Serial):
         return value[0]
 
     def _ioctl_get_unsigned_integer(self, ioctl_name):
-        return self._ioctl_get_integer(self, ioctl_name, 'I')
+        return self._ioctl_get_integer(ioctl_name, 'I')
 
     def _set_rs485(self, status):
         """Sets the value of the rs485 setting."""
@@ -283,43 +286,43 @@ class Port(serial.Serial):
 
     def _set_sample_rate(self, rate):
         """Sets the value of the sample_rate setting."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_SET_SAMPLE_RATE, rate)
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_SET_SAMPLE_RATE, rate)
 
     def _get_sample_rate(self):
         """Gets the value of the sample_rate setting."""
-        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_SAMPLE_RATE)
+        return self._ioctl_get_unsigned_integer(IOCTL_FASTCOM_GET_SAMPLE_RATE)
 
     sample_rate = property(fset=_set_sample_rate, fget=_get_sample_rate)
 
     def _set_tx_trigger(self, level):
         """Sets the value of the tx_trigger setting."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_SET_TX_TRIGGER, level)
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_SET_TX_TRIGGER, level)
 
     def _get_tx_trigger(self):
         """Gets the value of the tx_trigger setting."""
-        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_TX_TRIGGER)
+        return self._ioctl_get_unsigned_integer(IOCTL_FASTCOM_GET_TX_TRIGGER)
 
     tx_trigger = property(fset=_set_tx_trigger, fget=_get_tx_trigger)
 
     def _set_rx_trigger(self, level):
         """Sets the value of the rx_trigger setting."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_SET_RX_TRIGGER, level)
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_SET_RX_TRIGGER, level)
 
     def _get_rx_trigger(self):
         """Gets the value of the rx_trigger setting."""
-        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_RX_TRIGGER)
+        return self._ioctl_get_unsigned_integer(IOCTL_FASTCOM_GET_RX_TRIGGER)
 
     rx_trigger = property(fset=_set_rx_trigger, fget=_get_rx_trigger)
 
     def _set_clock_rate(self, rate):
         """Sets the value of the clock_rate setting."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_SET_CLOCK_RATE, rate)
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_SET_CLOCK_RATE, rate)
 
     clock_rate = property(fset=_set_clock_rate, fget=None)
 
     def enable_isochronous(self, mode):
         """Enables isochronous mode."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_ENABLE_ISOCHRONOUS, mode)
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_ENABLE_ISOCHRONOUS, mode)
 
     def disable_isochronous(self):
         """Disables isochronous mode."""
@@ -333,7 +336,7 @@ class Port(serial.Serial):
 
     def enable_external_transmit(self, num_frames):
         """Enables external transmit mode."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_ENABLE_EXTERNAL_TRANSMIT,
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_ENABLE_EXTERNAL_TRANSMIT,
                                 num_frames)
 
     def disable_external_transmit(self):
@@ -344,15 +347,15 @@ class Port(serial.Serial):
 
     def get_external_transmit(self):
         """Gets the value of the external transmit setting."""
-        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_EXTERNAL_TRANSMIT)
+        return self._ioctl_get_unsigned_integer(IOCTL_FASTCOM_GET_EXTERNAL_TRANSMIT)
 
     def _set_frame_length(self, num_chars):
         """Sets the value of the frame length setting."""
-        self._ioctl_set_integer(IOCTL_FASTCOM_SET_FRAME_LENGTH, num_chars)
+        self._ioctl_set_unsigned_integer(IOCTL_FASTCOM_SET_FRAME_LENGTH, num_chars)
 
     def _get_frame_length(self):
         """Gets the value of the frame length setting."""
-        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_FRAME_LENGTH)
+        return self._ioctl_get_unsigned_integer(IOCTL_FASTCOM_GET_FRAME_LENGTH)
 
     frame_length = property(fset=_set_frame_length, fget=_get_frame_length)
 
