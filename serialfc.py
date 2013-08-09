@@ -100,37 +100,37 @@ else:
                                          struct.calcsize("P"))
 
     IOCTL_FASTCOM_SET_SAMPLE_RATE = _IOW(SERIALFC_IOCTL_MAGIC, 9,
-                                         struct.calcsize("i"))
+                                         struct.calcsize("I"))
     IOCTL_FASTCOM_GET_SAMPLE_RATE = _IOR(SERIALFC_IOCTL_MAGIC, 10,
                                          struct.calcsize("P"))
 
     IOCTL_FASTCOM_SET_TX_TRIGGER = _IOW(SERIALFC_IOCTL_MAGIC, 11,
-                                        struct.calcsize("i"))
+                                        struct.calcsize("I"))
     IOCTL_FASTCOM_GET_TX_TRIGGER = _IOR(SERIALFC_IOCTL_MAGIC, 12,
                                         struct.calcsize("P"))
 
     IOCTL_FASTCOM_SET_RX_TRIGGER = _IOW(SERIALFC_IOCTL_MAGIC, 13,
-                                        struct.calcsize("i"))
+                                        struct.calcsize("I"))
     IOCTL_FASTCOM_GET_RX_TRIGGER = _IOR(SERIALFC_IOCTL_MAGIC, 14,
                                         struct.calcsize("P"))
 
     IOCTL_FASTCOM_SET_CLOCK_RATE = _IOW(SERIALFC_IOCTL_MAGIC, 15,
-                                        struct.calcsize("i"))
+                                        struct.calcsize("I"))
 
     IOCTL_FASTCOM_ENABLE_ISOCHRONOUS = _IOW(SERIALFC_IOCTL_MAGIC, 16,
-                                            struct.calcsize("i"))
+                                            struct.calcsize("I"))
     IOCTL_FASTCOM_DISABLE_ISOCHRONOUS = _IO(SERIALFC_IOCTL_MAGIC, 17)
     IOCTL_FASTCOM_GET_ISOCHRONOUS = _IOR(SERIALFC_IOCTL_MAGIC, 18,
                                          struct.calcsize("P"))
 
     IOCTL_FASTCOM_ENABLE_EXTERNAL_TRANSMIT = _IOW(SERIALFC_IOCTL_MAGIC, 19,
-                                                  struct.calcsize("i"))
+                                                  struct.calcsize("I"))
     IOCTL_FASTCOM_DISABLE_EXTERNAL_TRANSMIT = _IO(SERIALFC_IOCTL_MAGIC, 20)
     IOCTL_FASTCOM_GET_EXTERNAL_TRANSMIT = _IOR(SERIALFC_IOCTL_MAGIC, 21,
                                                struct.calcsize("P"))
 
     IOCTL_FASTCOM_SET_FRAME_LENGTH = _IOW(SERIALFC_IOCTL_MAGIC, 22,
-                                          struct.calcsize("i"))
+                                          struct.calcsize("I"))
     IOCTL_FASTCOM_GET_FRAME_LENGTH = _IOR(SERIALFC_IOCTL_MAGIC, 23,
                                           struct.calcsize("P"))
 
