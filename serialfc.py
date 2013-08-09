@@ -155,7 +155,13 @@ class Port(serial.Serial):
         ioctl_name = ioctl_enable if value else ioctl_disable
 
         if os.name == 'nt':
-            win32file.DeviceIoControl(self.hComPort, ioctl_name, None, 0, None)
+            try:
+                win32file.DeviceIoControl(self.hComPort, ioctl_name, None, 0, None)
+            except win32file.error as e:
+                if e.winerror == 50:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                else:
+                    raise
         else:
             try:
                 fcntl.ioctl(self.fd, ioctl_name)
@@ -168,8 +174,14 @@ class Port(serial.Serial):
     def _ioctl_get_boolean(self, ioctl_name):
         if os.name == 'nt':
             buf_size = struct.calcsize("?")
-            buf = win32file.DeviceIoControl(self.hComPort, ioctl_name,
-                                            None, buf_size, None)
+            try:
+                buf = win32file.DeviceIoControl(self.hComPort, ioctl_name,
+                                                None, buf_size, None)
+            except win32file.error as e:
+                if e.winerror == 50:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                else:
+                    raise
         else:
             try:
                 buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
@@ -179,15 +191,23 @@ class Port(serial.Serial):
                 else:
                     raise
 
-        value = struct.unpack("I", buf)
+        value = struct.unpack("?", buf)
 
         return True if value[0] else False
 
     def _ioctl_set_integer(self, ioctl_name, value):
         if os.name == 'nt':
-            value = struct.pack("I", value)
-            win32file.DeviceIoControl(self.hComPort, ioctl_name, value, 0,
-                                      None)
+            try:
+                value = struct.pack("I", value)
+                win32file.DeviceIoControl(self.hComPort, ioctl_name, value, 0,
+                                          None)
+            except win32file.error as e:
+                if e.winerror == 50:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                elif e.winerror == 87:
+                    raise ValueError("The argument is out of range.")
+                else:
+                    raise
         else:
             try:
                 fcntl.ioctl(self.fd, ioctl_name, value)
@@ -202,8 +222,14 @@ class Port(serial.Serial):
     def _ioctl_get_integer(self, ioctl_name):
         if os.name == 'nt':
             buf_size = struct.calcsize("I")
-            buf = win32file.DeviceIoControl(self.hComPort, ioctl_name, None,
-                                            buf_size, None)
+            try:
+                buf = win32file.DeviceIoControl(self.hComPort, ioctl_name, None,
+                                                buf_size, None)
+            except win32file.error as e:
+                if e.winerror == 50:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                else:
+                    raise
         else:
             try:
                 buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
@@ -353,7 +379,10 @@ class Port(serial.Serial):
     _card_type = property(fget=_get_card_type)
 
 if __name__ == '__main__':
-    p = Port('/dev/ttyS4', '/dev/serialfc0')
+    if os.name == 'nt':
+        p = Port('COM3')
+    else:
+        p = Port('/dev/ttyS4', '/dev/serialfc0')
 
     try:
         print("Termination", p.termination)
@@ -397,7 +426,11 @@ if __name__ == '__main__':
     except AttributeError as e:
         pass
 
-    p.termination = True
+    try:
+        p.termination = True
+    except AttributeError as e:
+        pass
+
     p.rs485 = False
     p.echo_cancel = False
     p.sample_rate = 16
