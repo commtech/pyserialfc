@@ -219,9 +219,9 @@ class Port(serial.Serial):
                 else:
                     raise
 
-    def _ioctl_get_integer(self, ioctl_name):
+    def _ioctl_get_integer(self, ioctl_name, fmt='i'):
         if os.name == 'nt':
-            buf_size = struct.calcsize("I")
+            buf_size = struct.calcsize(fmt)
             try:
                 buf = win32file.DeviceIoControl(self.hComPort, ioctl_name, None,
                                                 buf_size, None)
@@ -232,15 +232,18 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
+                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack(fmt, 0))
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
                 else:
                     raise
 
-        value = struct.unpack("I", buf)
+        value = struct.unpack(fmt, buf)
         return value[0]
+
+    def _ioctl_get_unsigned_integer(self, ioctl_name):
+        return self._ioctl_get_integer(self, ioctl_name, 'I')
 
     def _set_rs485(self, status):
         """Sets the value of the rs485 setting."""
