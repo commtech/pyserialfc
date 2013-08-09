@@ -137,6 +137,12 @@ else:
     IOCTL_FASTCOM_GET_CARD_TYPE = _IOR(SERIALFC_IOCTL_MAGIC, 24,
                                        struct.calcsize("P"))
 
+    IOCTL_FASTCOM_ENABLE_9BIT = _IOW(SERIALFC_IOCTL_MAGIC, 25,
+                                            struct.calcsize("I"))
+    IOCTL_FASTCOM_DISABLE_9BIT = _IO(SERIALFC_IOCTL_MAGIC, 26)
+    IOCTL_FASTCOM_GET_9BIT = _IOR(SERIALFC_IOCTL_MAGIC, 27,
+                                         struct.calcsize("P"))
+
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
 
 
@@ -361,21 +367,13 @@ class Port(serial.Serial):
 
     def _set_9bit(self, status):
         """Sets the value of the 9-bit setting."""
-        if status:
-            win32file.DeviceIoControl(self.hComPort, IOCTL_FASTCOM_ENABLE_9BIT, None, 0, None)
-        else:
-            win32file.DeviceIoControl(self.hComPort, IOCTL_FASTCOM_DISABLE_9BIT, None, 0, None)
+        self._ioctl_set_boolean(IOCTL_FASTCOM_ENABLE_9BIT,
+                                IOCTL_FASTCOM_DISABLE_9BIT,
+                                status)
 
     def _get_9bit(self):
         """Gets the value of the 9-bit setting."""
-        buf_size = struct.calcsize("?")
-        buf = win32file.DeviceIoControl(self.hComPort, IOCTL_FASTCOM_GET_9BIT, None, buf_size, None)
-        value = struct.unpack("?", buf)
-
-        if (value[0]):
-            return True
-        else:
-            return False
+        return self._ioctl_get_boolean(IOCTL_FASTCOM_GET_9BIT)
 
     nine_bit = property(fset=_set_9bit, fget=_get_9bit)
 
@@ -410,6 +408,11 @@ if __name__ == '__main__':
     except AttributeError as e:
         pass
 
+    try:
+        print('9-Bit', p.nine_bit)
+    except AttributeError as e:
+        pass
+
     print('RS485', p.rs485)
     print('Echo Cancel', p.echo_cancel)
     print('Sample Rate', p.sample_rate)
@@ -434,6 +437,11 @@ if __name__ == '__main__':
 
     try:
         p.termination = True
+    except AttributeError as e:
+        pass
+
+    try:
+        p.nine_bit = False
     except AttributeError as e:
         pass
 
