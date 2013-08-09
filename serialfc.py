@@ -326,7 +326,7 @@ class Port(serial.Serial):
 
     def get_isochronous(self):
         """Gets the value of the isochronous setting."""
-        return self._ioctl_get_integer(IOCTL_FASTCOM_ENABLE_ISOCHRONOUS)
+        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_ISOCHRONOUS)
 
     def enable_external_transmit(self, num_frames):
         """Enables external transmit mode."""
