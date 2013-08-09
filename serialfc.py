@@ -195,10 +195,10 @@ class Port(serial.Serial):
 
         return True if value[0] else False
 
-    def _ioctl_set_integer(self, ioctl_name, value):
+    def _ioctl_set_integer(self, ioctl_name, value, fmt='i'):
         if os.name == 'nt':
             try:
-                value = struct.pack('I', value)
+                value = struct.pack(fmt, value)
                 win32file.DeviceIoControl(self.hComPort, ioctl_name, value, 0,
                                           None)
             except win32file.error as e:
