@@ -184,7 +184,7 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
+                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("?", 0))
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
