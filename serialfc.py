@@ -173,7 +173,7 @@ class Port(serial.Serial):
 
     def _ioctl_get_boolean(self, ioctl_name):
         if os.name == 'nt':
-            buf_size = struct.calcsize("?")
+            buf_size = struct.calcsize('?')
             try:
                 buf = win32file.DeviceIoControl(self.hComPort, ioctl_name,
                                                 None, buf_size, None)
@@ -184,28 +184,28 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("?", 0))
+                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack('?', 0))
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
                 else:
                     raise
 
-        value = struct.unpack("?", buf)
+        value = struct.unpack('?', buf)
 
         return True if value[0] else False
 
     def _ioctl_set_integer(self, ioctl_name, value):
         if os.name == 'nt':
             try:
-                value = struct.pack("I", value)
+                value = struct.pack('I', value)
                 win32file.DeviceIoControl(self.hComPort, ioctl_name, value, 0,
                                           None)
             except win32file.error as e:
                 if e.winerror == 50:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
                 elif e.winerror == 87:
-                    raise ValueError("The argument is out of range.")
+                    raise ValueError('The argument is out of range.')
                 else:
                     raise
         else:
@@ -215,7 +215,7 @@ class Port(serial.Serial):
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
                 elif e.errno == errno.EINVAL:
-                    raise ValueError("The argument is out of range.")
+                    raise ValueError('The argument is out of range.')
                 else:
                     raise
 
