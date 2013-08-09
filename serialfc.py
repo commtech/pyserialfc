@@ -388,31 +388,31 @@ if __name__ == '__main__':
         p = Port('/dev/ttyS4', '/dev/serialfc0')
 
     try:
-        print("Termination", p.termination)
+        print('Termination', p.termination)
     except AttributeError as e:
         pass
 
     try:
-        print("Isochronous", p.get_isochronous())
+        print('Isochronous', p.get_isochronous())
     except AttributeError as e:
         pass
 
     try:
-        print("Frame Length", p.frame_length)
+        print('Frame Length', p.frame_length)
     except AttributeError as e:
         pass
 
     try:
-        print("External Transmit", p.get_external_transmit())
+        print('External Transmit', p.get_external_transmit())
     except AttributeError as e:
         pass
 
-    print("RS485", p.rs485)
-    print("Echo Cancel", p.echo_cancel)
-    print("Sample Rate", p.sample_rate)
-    print("Tx Trigger", p.tx_trigger)
-    print("Rx Trigger", p.rx_trigger)
-    print("Card Type", p._card_type)
+    print('RS485', p.rs485)
+    print('Echo Cancel', p.echo_cancel)
+    print('Sample Rate', p.sample_rate)
+    print('Tx Trigger', p.tx_trigger)
+    print('Rx Trigger', p.rx_trigger)
+    print('Card Type', p._card_type)
 
     try:
         p.disable_isochronous()
