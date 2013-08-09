@@ -6,6 +6,7 @@ if os.name == 'nt':
     import win32file
 else:
     import fcntl
+    import errno
 
 
 if os.name == 'nt':
@@ -135,6 +136,9 @@ else:
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
 
 
+NOT_SUPPORTED_TEXT = 'This feature isn\'t supported on this port.'
+
+
 class Port(serial.Serial):
 
     def __init__(self, ttyS, serialfc=None):
@@ -149,7 +153,13 @@ class Port(serial.Serial):
         if os.name == 'nt':
             win32file.DeviceIoControl(self.hComPort, ioctl_name, None, 0, None)
         else:
-            fcntl.ioctl(self.fd, ioctl_name)
+            try:
+                fcntl.ioctl(self.fd, ioctl_name)
+            except IOError as e:
+                if e.errno == errno.EPROTONOSUPPORT:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                else:
+                    raise
 
     def _ioctl_get_boolean(self, ioctl_name):
         if os.name == 'nt':
@@ -157,7 +167,13 @@ class Port(serial.Serial):
             buf = win32file.DeviceIoControl(self.hComPort, ioctl_name,
                                             None, buf_size, None)
         else:
-            buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
+            try:
+                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
+            except IOError as e:
+                if e.errno == errno.EPROTONOSUPPORT:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                else:
+                    raise
 
         value = struct.unpack("I", buf)
 
@@ -169,7 +185,15 @@ class Port(serial.Serial):
             win32file.DeviceIoControl(self.hComPort, ioctl_name, value, 0,
                                       None)
         else:
-            fcntl.ioctl(self.fd, ioctl_name, value)
+            try:
+                fcntl.ioctl(self.fd, ioctl_name, value)
+            except IOError as e:
+                if e.errno == errno.EPROTONOSUPPORT:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                elif e.errno == errno.EINVAL:
+                    raise ValueError("The argument is out of range.")
+                else:
+                    raise
 
     def _ioctl_get_integer(self, ioctl_name):
         if os.name == 'nt':
@@ -177,8 +201,13 @@ class Port(serial.Serial):
             buf = win32file.DeviceIoControl(self.hComPort, ioctl_name, None,
                                             buf_size, None)
         else:
-            buf = fcntl.ioctl(self.fd, ioctl_name,
-                              struct.pack("I", 0))
+            try:
+                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack("I", 0))
+            except IOError as e:
+                if e.errno == errno.EPROTONOSUPPORT:
+                    raise AttributeError(NOT_SUPPORTED_TEXT)
+                else:
+                    raise
 
         value = struct.unpack("I", buf)
         return value[0]
@@ -302,26 +331,54 @@ class Port(serial.Serial):
 if __name__ == '__main__':
     p = Port('/dev/ttyS4', '/dev/serialfc0')
 
-    print("Termination", p.termination)
-    print("Isochronous", p.get_isochronous())
+    try:
+        print("Termination", p.termination)
+    except AttributeError as e:
+        pass
+
+    try:
+        print("Isochronous", p.get_isochronous())
+    except AttributeError as e:
+        pass
+
+    try:
+        print("Frame Length", p.frame_length)
+    except AttributeError as e:
+        pass
+
+    try:
+        print("External Transmit", p.get_external_transmit())
+    except AttributeError as e:
+        pass
+
     print("RS485", p.rs485)
     print("Echo Cancel", p.echo_cancel)
     print("Sample Rate", p.sample_rate)
     print("Tx Trigger", p.tx_trigger)
     print("Rx Trigger", p.rx_trigger)
-    print("Frame Length", p.frame_length)
-    print("External Transmit", p.get_external_transmit())
     print("Card Type", p._card_type)
 
+    try:
+        p.disable_isochronous()
+    except AttributeError as e:
+        pass
+
+    try:
+        p.frame_length = 1
+    except AttributeError as e:
+        pass
+
+    try:
+        p.disable_external_transmit()
+    except AttributeError as e:
+        pass
+
     p.termination = True
-    p.disable_isochronous()
     p.rs485 = False
     p.echo_cancel = False
     p.sample_rate = 16
     p.tx_trigger = 32
     p.rx_trigger = 32
-    p.frame_length = 1
-    p.disable_external_transmit()
 
 #    p.baudrate = 115200
 #    p.write("UUUUU".encode())
