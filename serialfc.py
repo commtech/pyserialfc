@@ -155,7 +155,9 @@ class Port(serial.Serial):
         super(Port, self).__init__(ttyS)
 
         if serialfc:
-            self.fd = open(serialfc)
+            self.sfd = open(serialfc)
+        else:
+            self.sfd = -1
 
     def _ioctl_set_boolean(self, ioctl_enable, ioctl_disable, value):
         ioctl_name = ioctl_enable if value else ioctl_disable
@@ -170,7 +172,7 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                fcntl.ioctl(self.fd, ioctl_name)
+                fcntl.ioctl(self.sfd, ioctl_name)
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
@@ -190,7 +192,7 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack('?', 0))
+                buf = fcntl.ioctl(self.sfd, ioctl_name, struct.pack('?', 0))
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
@@ -216,7 +218,7 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                fcntl.ioctl(self.fd, ioctl_name, value)
+                fcntl.ioctl(self.sfd, ioctl_name, value)
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
@@ -241,7 +243,7 @@ class Port(serial.Serial):
                     raise
         else:
             try:
-                buf = fcntl.ioctl(self.fd, ioctl_name, struct.pack(fmt, 0))
+                buf = fcntl.ioctl(self.sfd, ioctl_name, struct.pack(fmt, 0))
             except IOError as e:
                 if e.errno == errno.EPROTONOSUPPORT:
                     raise AttributeError(NOT_SUPPORTED_TEXT)
@@ -382,6 +384,12 @@ class Port(serial.Serial):
 
     _card_type = property(fget=_get_card_type)
 
+    def close(self):
+        if self.sfd >= 0:
+            self.sfd.close()
+
+        super(Port, self).close()
+
 if __name__ == '__main__':
     if os.name == 'nt':
         p = Port('COM3')
@@ -453,3 +461,5 @@ if __name__ == '__main__':
 
 #    p.baudrate = 115200
 #    p.write("UUUUU".encode())
+
+    p.close()
