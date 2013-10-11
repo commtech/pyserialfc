@@ -422,6 +422,8 @@ if __name__ == '__main__':
     else:
         p = Port('/dev/ttyS4', '/dev/serialfc0')
 
+    p.disable_isochronous()
+
     try:
         print('Termination', p.termination)
     except AttributeError as e:
@@ -453,6 +455,7 @@ if __name__ == '__main__':
     print('Tx Trigger', p.tx_trigger)
     print('Rx Trigger', p.rx_trigger)
     print('Card Type', p._card_type)
+    print('Fixed Baud Rate', p.get_fixed_baud_rate())
 
     try:
         p.disable_isochronous()
@@ -484,6 +487,7 @@ if __name__ == '__main__':
     p.sample_rate = 16
     p.tx_trigger = 32
     p.rx_trigger = 32
+    p.disable_fixed_baud_rate()
 
 #    p.baudrate = 115200
 #    p.write("UUUUU".encode())
