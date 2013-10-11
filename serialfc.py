@@ -60,6 +60,10 @@ if os.name == 'nt':
     IOCTL_FASTCOM_ENABLE_9BIT = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x819)
     IOCTL_FASTCOM_DISABLE_9BIT = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81A)
     IOCTL_FASTCOM_GET_9BIT = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81B)
+
+    IOCTL_FASTCOM_ENABLE_FIXED_BAUD_RATE = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81C)
+    IOCTL_FASTCOM_DISABLE_FIXED_BAUD_RATE = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81D)
+    IOCTL_FASTCOM_GET_FIXED_BAUD_RATE = CTL_CODE(SERIALFC_IOCTL_MAGIC, 0x81E)
 else:
     IOCPARM_MASK = 0x7f
     IO_NONE = 0x00000000
@@ -141,6 +145,13 @@ else:
                                      struct.calcsize("I"))
     IOCTL_FASTCOM_DISABLE_9BIT = _IO(SERIALFC_IOCTL_MAGIC, 26)
     IOCTL_FASTCOM_GET_9BIT = _IOR(SERIALFC_IOCTL_MAGIC, 27,
+                                  struct.calcsize("P"))
+
+    # Not supported in Linux. Should probably remove this
+    IOCTL_FASTCOM_ENABLE_FIXED_BAUD_RATE = _IOW(SERIALFC_IOCTL_MAGIC, 28,
+                                     struct.calcsize("I"))
+    IOCTL_FASTCOM_DISABLE_FIXED_BAUD_RATE = _IO(SERIALFC_IOCTL_MAGIC, 29)
+    IOCTL_FASTCOM_GET_FIXED_BAUD_RATE = _IOR(SERIALFC_IOCTL_MAGIC, 30,
                                   struct.calcsize("P"))
 
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
@@ -379,6 +390,20 @@ class Port(serial.Serial):
         return self._ioctl_get_boolean(IOCTL_FASTCOM_GET_9BIT)
 
     nine_bit = property(fset=_set_9bit, fget=_get_9bit)
+
+    def enable_fixed_baud_rate(self, rate):
+        """Enables fixed baud rate mode."""
+        self._ioctl_set_uinteger(IOCTL_FASTCOM_ENABLE_FIXED_BAUD_RATE, rate)
+
+    def disable_fixed_baud_rate(self):
+        """Disables fixed baud rate mode."""
+        self._ioctl_set_boolean(IOCTL_FASTCOM_ENABLE_FIXED_BAUD_RATE,
+                                IOCTL_FASTCOM_DISABLE_FIXED_BAUD_RATE,
+                                False)
+
+    def get_fixed_baud_rate(self):
+        """Gets the value of the fixed baud rate setting."""
+        return self._ioctl_get_integer(IOCTL_FASTCOM_GET_FIXED_BAUD_RATE)
 
     def _get_card_type(self):
         return self._ioctl_get_integer(IOCTL_FASTCOM_GET_CARD_TYPE)
