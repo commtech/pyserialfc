@@ -165,6 +165,7 @@ class Port(serial.Serial):
     def __init__(self, port_num, ttyS=None, serialfc=None):
         if os.name == 'nt':
             super(Port, self).__init__('COM{}'.format(port_num))
+            self.sfd = None
         else:
             if ttyS:
                 ttyS_name = ttyS
@@ -176,9 +177,8 @@ class Port(serial.Serial):
             else:
                 serialfc_name = '/dev/serialfc{}'.format(port_num)
 
-        super(Port, self).__init__(ttyS_name)
-
-        self.sfd = open(serialfc_name)
+            super(Port, self).__init__(ttyS_name)
+            self.sfd = open(serialfc_name)
 
     def _ioctl_set_boolean(self, ioctl_enable, ioctl_disable, value):
         ioctl_name = ioctl_enable if value else ioctl_disable
@@ -427,7 +427,10 @@ class Port(serial.Serial):
         super(Port, self).close()
 
 if __name__ == '__main__':
-    p = Port(0)
+    if os.name == 'nt':
+        p = Port(3)
+    else:
+        p = Port(0)
 
     p.disable_isochronous()
 
