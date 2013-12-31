@@ -141,17 +141,16 @@ else:
     IOCTL_FASTCOM_GET_CARD_TYPE = _IOR(SERIALFC_IOCTL_MAGIC, 24,
                                        struct.calcsize("P"))
 
-    IOCTL_FASTCOM_ENABLE_9BIT = _IOW(SERIALFC_IOCTL_MAGIC, 25,
-                                     struct.calcsize("I"))
+    IOCTL_FASTCOM_ENABLE_9BIT = _IO(SERIALFC_IOCTL_MAGIC, 25)
     IOCTL_FASTCOM_DISABLE_9BIT = _IO(SERIALFC_IOCTL_MAGIC, 26)
     IOCTL_FASTCOM_GET_9BIT = _IOR(SERIALFC_IOCTL_MAGIC, 27,
                                   struct.calcsize("P"))
 
     # Not supported in Linux. Should probably remove this
-    IOCTL_FASTCOM_ENABLE_FIXED_BAUD_RATE = _IOW(SERIALFC_IOCTL_MAGIC, 28,
+    IOCTL_FASTCOM_ENABLE_FIXED_BAUD_RATE = _IOW(SERIALFC_IOCTL_MAGIC, 29,
                                      struct.calcsize("I"))
-    IOCTL_FASTCOM_DISABLE_FIXED_BAUD_RATE = _IO(SERIALFC_IOCTL_MAGIC, 29)
-    IOCTL_FASTCOM_GET_FIXED_BAUD_RATE = _IOR(SERIALFC_IOCTL_MAGIC, 30,
+    IOCTL_FASTCOM_DISABLE_FIXED_BAUD_RATE = _IO(SERIALFC_IOCTL_MAGIC, 30)
+    IOCTL_FASTCOM_GET_FIXED_BAUD_RATE = _IOR(SERIALFC_IOCTL_MAGIC, 31,
                                   struct.calcsize("P"))
 
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
