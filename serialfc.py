@@ -162,13 +162,23 @@ NOT_SUPPORTED_TEXT = 'This feature isn\'t supported on this port.'
 
 class Port(serial.Serial):
 
-    def __init__(self, ttyS, serialfc=None):
-        super(Port, self).__init__(ttyS)
-
-        if serialfc:
-            self.sfd = open(serialfc)
+    def __init__(self, port_num, ttyS=None, serialfc=None):
+        if os.name == 'nt':
+            super(Port, self).__init__('COM{}'.format(port_num))
         else:
-            self.sfd = -1
+            if ttyS:
+                ttyS_name = ttyS
+            else:
+                ttyS_name = '/dev/ttyS{}'.format(port_num + 4)
+
+            if serialfc:
+                serialfc_name = serialfc
+            else:
+                serialfc_name = '/dev/serialfc{}'.format(port_num)
+
+        super(Port, self).__init__(ttyS_name)
+
+        self.sfd = open(serialfc_name)
 
     def _ioctl_set_boolean(self, ioctl_enable, ioctl_disable, value):
         ioctl_name = ioctl_enable if value else ioctl_disable
@@ -411,16 +421,13 @@ class Port(serial.Serial):
     _card_type = property(fget=_get_card_type)
 
     def close(self):
-        if self.sfd >= 0:
+        if self.sfd:
             self.sfd.close()
 
         super(Port, self).close()
 
 if __name__ == '__main__':
-    if os.name == 'nt':
-        p = Port('COM3')
-    else:
-        p = Port('/dev/ttyS4', '/dev/serialfc0')
+    p = Port(0)
 
     p.disable_isochronous()
 
