@@ -462,7 +462,11 @@ if __name__ == '__main__':
     print('Tx Trigger', p.tx_trigger)
     print('Rx Trigger', p.rx_trigger)
     print('Card Type', p._card_type)
-    print('Fixed Baud Rate', p.get_fixed_baud_rate())
+
+    try:
+        print('Fixed Baud Rate', p.get_fixed_baud_rate())
+    except:
+        pass
 
     try:
         p.disable_isochronous()
@@ -489,12 +493,16 @@ if __name__ == '__main__':
     except AttributeError as e:
         pass
 
+    try:
+        p.disable_fixed_baud_rate()
+    except:
+        pass
+
     p.rs485 = False
     p.echo_cancel = False
     p.sample_rate = 16
     p.tx_trigger = 32
     p.rx_trigger = 32
-    p.disable_fixed_baud_rate()
 
 #    p.baudrate = 115200
 #    p.write("UUUUU".encode())
