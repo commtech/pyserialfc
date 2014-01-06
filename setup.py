@@ -3,11 +3,14 @@ from distutils.core import setup
 
 if os.name == 'nt':
     requirements = ['serial', 'win32']
+    data_files=[('DLLs', ['cserialfc.dll'])]
 else:
     requirements = ['serial']
+    data_files=[('DLLs', ['libcserialfc.so', 'libcserialfc.so.6'])]
 
 setup(name='pyserialfc',
       version='1.3.0',
-      py_modules=['serialfc'],
+      packages = ['serialfc'],
+      data_files=data_files,
       requires=requirements,
       )
