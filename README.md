@@ -21,6 +21,7 @@ python setup.py install
 ## Dependencies
 - [Python 3](http://www.python.org/download/) (32-bit)
 - [pySerial](http://pyserial.sourceforge.net/)
+- [cserialfc](https://github.com/commtech/cserialfc/) (Included)
 
 
 ## API Compatibility
