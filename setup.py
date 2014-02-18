@@ -10,7 +10,7 @@ else:
 
 setup(name='pyserialfc',
       version='1.3.0',
-      packages = ['serialfc'],
+      packages = ['serialfc', 'serialfc.tools'],
       data_files=data_files,
       requires=requirements,
       )
