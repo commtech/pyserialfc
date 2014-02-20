@@ -48,6 +48,17 @@ CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
 NOT_SUPPORTED_TEXT = 'This feature isn\'t supported on this port.'
 
 
+class PortNotFoundError(OSError):
+    def __init__(self, port_num):
+        super(PortNotFoundError, self).__init__(
+            'Port {} not found'.format(port_num))
+
+
+class InvalidAccessError(OSError):
+    def __init__(self):
+        super(InvalidAccessError, self).__init__('Invalid access')
+
+
 class InvalidParameterError(ValueError):
     def __str__(self):
         return 'Invalid parameter'
@@ -67,10 +78,10 @@ class Port(serial.Serial):
 
             if e == 0:
                 pass
-            #elif e == FSCC_PORT_NOT_FOUND:
-            #    raise PortNotFoundError(port_num)
-            #elif e == FSCC_INVALID_ACCESS:
-            #    raise InvalidAccessError()
+            elif e == SERIALFC_PORT_NOT_FOUND:
+                raise PortNotFoundError(port_num)
+            elif e == SERIALFC_INVALID_ACCESS:
+                raise InvalidAccessError()
             else:
                 raise OSError(e)
 
