@@ -242,7 +242,7 @@ class Port(serial.Serial):
 
     def _set_9bit(self, status):
         """Sets the value of the 9-bit setting."""
-        self.ctypes_set_bool(lib.serialfc_enable_9bit,
+        self._ctypes_set_bool(lib.serialfc_enable_9bit,
                              lib.serialfc_disable_9bit,
                              status)
 
