@@ -20,6 +20,7 @@ python setup.py install
 
 ## Run-time Dependencies
 - [Python 3](http://www.python.org/download/) (32-bit)
+- [pySerial](http://pyserial.sourceforge.net/) (32-bit)
 - [cserialfc](https://github.com/commtech/cserialfc/) (Included)
 - OS: Windows XP+ & Linux
 
