@@ -41,11 +41,11 @@ except:
         lib = ctypes.cdll.LoadLibrary(os.path.join(sys.prefix, 'local', 'DLLs',
                                                    DLL_NAME))
 
-SERIALFC_NOT_SUPPORTED, SERIALFC_INVALID_PARAMETER = 17000, 17001
+SERIALFC_NOT_SUPPORTED, SERIALFC_INVALID_PARAMETER, \
+    SERIALFC_INVALID_ACCESS, \
+    SERIALFC_PORT_NOT_FOUND = 17000, 17001, 17002, 17003
 
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
-
-SERIALFC_NOT_SUPPORTED, SERIALFC_INVALID_PARAMETER = 17000, 17001
 
 
 class PortNotFoundError(OSError):
@@ -96,6 +96,10 @@ class Port(serial.Serial):
             raise AttributeError
         elif e == SERIALFC_INVALID_PARAMETER:
             raise InvalidParameterError()
+        elif e == SERIALFC_PORT_NOT_FOUND:
+            raise PortNotFoundError()
+        elif e == SERIALFC_INVALID_ACCESS:
+            raise InvalidAccessError()
         else:
             raise OSError(e)
 
