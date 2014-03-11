@@ -19,9 +19,7 @@
 """
 
 import ctypes
-import struct
 import re
-from array import array
 from ctypes.wintypes import DWORD, WORD, BYTE, ULONG, BOOL
 
 

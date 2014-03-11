@@ -45,7 +45,7 @@ SERIALFC_NOT_SUPPORTED, SERIALFC_INVALID_PARAMETER = 17000, 17001
 
 CARD_TYPE_PCI, CARD_TYPE_PCIe, CARD_TYPE_FSCC, CARD_TYPE_UNKNOWN = range(4)
 
-NOT_SUPPORTED_TEXT = 'This feature isn\'t supported on this port.'
+SERIALFC_NOT_SUPPORTED, SERIALFC_INVALID_PARAMETER = 17000, 17001
 
 
 class PortNotFoundError(OSError):
@@ -76,14 +76,7 @@ class Port(serial.Serial):
 
             e = lib.serialfc_connect(port_num, ctypes.byref(self._handle))
 
-            if e == 0:
-                pass
-            elif e == SERIALFC_PORT_NOT_FOUND:
-                raise PortNotFoundError(port_num)
-            elif e == SERIALFC_INVALID_ACCESS:
-                raise InvalidAccessError()
-            else:
-                raise OSError(e)
+            Port._check_error(e)
 
             self._handle = self._handle.value
             self._port_num = port_num
@@ -243,8 +236,8 @@ class Port(serial.Serial):
     def _set_9bit(self, status):
         """Sets the value of the 9-bit setting."""
         self._ctypes_set_bool(lib.serialfc_enable_9bit,
-                             lib.serialfc_disable_9bit,
-                             status)
+                              lib.serialfc_disable_9bit,
+                              status)
 
     def _get_9bit(self):
         """Gets the value of the 9-bit setting."""
