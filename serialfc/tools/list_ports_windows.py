@@ -1,0 +1,171 @@
+"""
+    Copyright (C) 2014 Commtech, Inc.
+
+    This file is part of pyserialfc.
+
+    pyserialfc is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    pyserialfc is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with pyserialfc.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+
+import ctypes
+import struct
+import re
+from array import array
+from ctypes.wintypes import DWORD, WORD, BYTE, ULONG, BOOL
+
+
+class GUID(ctypes.Structure):
+    _fields_ = [
+        ('Data1', DWORD),
+        ('Data2', WORD),
+        ('Data3', WORD),
+        ('Data4', BYTE*8),
+    ]
+
+    def __init__(self, a, b, c, d):
+        self.Data1, self.Data2, self.Data3, self.Data4 = a, b, c, d
+
+    def __str__(self):
+        return "{%08x-%04x-%04x-%s-%s}" % (
+            self.Data1,
+            self.Data2,
+            self.Data3,
+            ''.join(["%02x" % d for d in self.Data4[:2]]),
+            ''.join(["%02x" % d for d in self.Data4[2:]]),
+        )
+
+
+# some details of the windows API differ between 32 and 64 bit systems..
+def is_64bit():
+    """Returns true when running on a 64 bit system"""
+    return ctypes.sizeof(ctypes.c_ulong) != ctypes.sizeof(ctypes.c_void_p)
+
+# ULONG_PTR is a an ordinary number, not a pointer and contrary to the name it
+# is either 32 or 64 bits, depending on the type of windows...
+# so test if this a 32 bit windows...
+if is_64bit():
+    # assume 64 bits
+    ULONG_PTR = ctypes.c_int64
+else:
+    # 32 bits
+    ULONG_PTR = ctypes.c_ulong
+
+
+class SP_DEVINFO_DATA(ctypes.Structure):
+    _fields_ = [
+        ('cbSize', DWORD),
+        ('ClassGuid', GUID),
+        ('DevInst', DWORD),
+        ('Reserved', ULONG_PTR),
+    ]
+
+    def __str__(self):
+        return "ClassGuid:%s DevInst:%s" % (self.ClassGuid, self.DevInst)
+
+
+NULL = 0
+HDEVINFO = ctypes.c_void_p
+DIGCF_PRESENT = 2
+DICS_FLAG_GLOBAL = 1
+DIREG_DEV = 0x00000001
+KEY_READ = 0x20019
+PDWORD = ctypes.POINTER(DWORD)
+PSP_DEVINFO_DATA = ctypes.POINTER(SP_DEVINFO_DATA)
+PBYTE = ctypes.c_void_p
+SPDRP_HARDWAREID = 1
+
+setupapi = ctypes.windll.LoadLibrary("setupapi")
+advapi32 = ctypes.windll.LoadLibrary("Advapi32")
+
+SetupDiDestroyDeviceInfoList = setupapi.SetupDiDestroyDeviceInfoList
+SetupDiEnumDeviceInfo = setupapi.SetupDiEnumDeviceInfo
+SetupDiGetClassDevs = setupapi.SetupDiGetClassDevsA
+SetupDiOpenDevRegKey = setupapi.SetupDiOpenDevRegKey
+RegCloseKey = advapi32.RegCloseKey
+RegQueryValueEx = advapi32.RegQueryValueExA
+
+SetupDiGetDeviceRegistryProperty = setupapi.SetupDiGetDeviceRegistryPropertyA
+SetupDiGetDeviceRegistryProperty.argtypes = [HDEVINFO, PSP_DEVINFO_DATA, DWORD, PDWORD, PBYTE, DWORD, PDWORD]
+SetupDiGetDeviceRegistryProperty.restype = BOOL
+
+def string(buffer):
+    s = []
+    for c in buffer:
+        if c == 0: break
+        s.append(chr(c & 0xff)) # "& 0xff": hack to convert signed to unsigned
+    return ''.join(s)
+
+def get_trailing_number(s):
+    m = re.search(r'\d+$', s)
+    return int(m.group()) if m else None
+
+
+def serialfcports():
+    serialfc_guid = GUID(0x4d36e978, 0xe325, 0x11ce,
+                     (0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18))
+
+    g_hdi = SetupDiGetClassDevs(ctypes.byref(serialfc_guid),
+                                None,
+                                NULL,
+                                DIGCF_PRESENT)
+
+    devinfo = SP_DEVINFO_DATA()
+    devinfo.cbSize = ctypes.sizeof(devinfo)
+    index = 0
+
+    while SetupDiEnumDeviceInfo(g_hdi, index, ctypes.byref(devinfo)):
+        index += 1
+
+        # hardware ID
+        hardware_id_buffer = (BYTE * 250)()
+        SetupDiGetDeviceRegistryProperty(
+                g_hdi,
+                ctypes.byref(devinfo),
+                SPDRP_HARDWAREID,
+                None,
+                ctypes.byref(hardware_id_buffer),
+                ctypes.sizeof(hardware_id_buffer) - 1,
+                None)
+
+        hardware_id = string(hardware_id_buffer)
+
+        if not hardware_id.startswith('SerialFC'):
+            continue
+
+        # get the serialfc port number
+        hkey = SetupDiOpenDevRegKey(g_hdi,
+                                    ctypes.byref(devinfo),
+                                    DICS_FLAG_GLOBAL,
+                                    0,
+                                    DIREG_DEV,  # DIREG_DRV for SW info
+                                    KEY_READ)
+
+        port_name_buffer = (BYTE * 250)()
+        port_name_length = ULONG(ctypes.sizeof(port_name_buffer))
+
+        RegQueryValueEx(hkey,
+                        b'PortName',
+                        None,
+                        None,
+                        ctypes.byref(port_name_buffer),
+                        ctypes.byref(port_name_length))
+
+        RegCloseKey(hkey)
+
+        port_name = string(port_name_buffer)
+        port_num = get_trailing_number(port_name)
+
+        yield port_num, port_name
+
+    SetupDiDestroyDeviceInfoList(g_hdi)
