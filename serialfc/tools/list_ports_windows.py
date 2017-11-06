@@ -1,5 +1,5 @@
 """
-    Copyright (C) 2014 Commtech, Inc.
+    Copyright (C) 2017 Commtech, Inc.
 
     This file is part of pyserialfc.
 
