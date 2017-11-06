@@ -70,7 +70,10 @@ class Port(serial.Serial):
         if os.name == 'nt':
             ttyS_name = 'COM{}'.format(port_num)
             super(Port, self).__init__(ttyS_name)
-            self._handle = self.hComPort
+            try:
+                self._handle = self.hComPort
+            except AttributeError:
+                self._handle = self._port_handle
         else:
             self._handle = ctypes.c_void_p()
 
