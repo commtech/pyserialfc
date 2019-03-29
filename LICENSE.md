@@ -1,4 +1,3 @@
-"""
 Copyright 2019 Commtech, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -18,15 +17,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
-"""
-
-import glob
-import re
-
-
-def serialfcports():
-    device_paths = glob.glob('/dev/serialfc*')
-
-    for path in device_paths:
-        port_num = re.search('(\d+)$', path).group(0)
-        yield port_num, path
