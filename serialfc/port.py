@@ -275,6 +275,12 @@ class Port(serial.Serial):
         lib.serialfc_disconnect(self._handle)
         super(Port, self).close()
 
+    def _reconfigure_port( self, *args, **kwargs ):
+        try:
+            super()._reconfigure_port( *args, **kwargs )
+        except serial.SerialException:
+            pass
+
 if __name__ == '__main__':
     if os.name == 'nt':
         p = Port(3)
