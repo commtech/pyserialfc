@@ -275,6 +275,11 @@ class Port(serial.Serial):
         lib.serialfc_disconnect(self._handle)
         super(Port, self).close()
 
+# This fixes an issue with Windows 10 where the newer implementations 
+# of _reconfigure_port fail if the returned GetCommState isn't 
+# exactly the same as the sent SetCommState.
+# Luckily, the error is thrown at the end, so we can just ignore it
+# https://github.com/pyserial/pyserial/issues/362#issue-336855944
     def _reconfigure_port( self, *args, **kwargs ):
         try:
             super()._reconfigure_port( *args, **kwargs )
